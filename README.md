@@ -1,0 +1,56 @@
+# RISC-V 32-Bit Single-Cycle CPU Core (RV32I Subset)
+
+A Verilog implementation of a single-cycle RISC-V processor core targeted for the **Gowin Tang Nano 9K FPGA**. The design includes a full datapath, control unit, memory-mapped I/O (MMIO), a physical UART transmitter, and an automated verification testbench.
+
+---
+
+## Architecture Overview
+
+* **Instruction Set Architecture:** RV32I subset (`ADDI`, `ADD`, `SUB`, `AND`, `OR`, `SLT`, `SW`, `LW`, `BEQ`).
+* **Datapath:** Single-cycle execution with asynchronous read / synchronous write register file (32 x 32-bit).
+* **Peripherals & I/O:** 
+  * Memory-Mapped I/O (MMIO) targeting address `0x00000040`.
+  * Dedicated hardware UART transmitter module operating at 115200 baud (27MHz system clock).
+  * 6-bit visual instruction/PC indicator mapped to onboard LEDs.
+* **Clock Management:** Custom frequency divider scaling the onboard 27MHz clock for stable hardware execution.
+
+---
+
+## Supported Instructions
+
+| Type | Instruction | Opcode | Funct3 | Funct7 | Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **R-Type** | `ADD` | `0110011` | `000` | `0000000` | Register addition |
+| | `SUB` | `0110011` | `000` | `0100000` | Register subtraction |
+| | `AND` | `0110011` | `111` | `0000000` | Bitwise AND |
+| | `OR` | `0110011` | `110` | `0000000` | Bitwise OR |
+| | `SLT` | `0110011` | `010` | `0000000` | Signed set less than |
+| **I-Type** | `ADDI` | `0010011` | `000` | N/A | Add immediate |
+| | `LW` | `0000011` | `010` | N/A | Load word from data memory |
+| **S-Type** | `SW` | `0100011` | `010` | N/A | Store word to data memory / MMIO |
+| **B-Type** | `BEQ` | `1100011` | `000` | N/A | Branch if equal |
+
+---
+
+## Verification & Self-Checking Testbench
+
+The core was verified using an automated self-checking testbench simulated with Icarus Verilog. Each instruction writes its result to the register file, and the testbench samples registers post-execution to validate state.
+
+### Simulation Summary:
+```text
+==========================================
+   STARTING SELF-CHECKING VERIFICATION    
+==========================================
+[PASS] ADDI (x1)    | x1  = 10
+[PASS] ADDI (x2)    | x2  = 20
+[PASS] ADD          | x3  = 30
+[PASS] SUB          | x4  = 10
+[PASS] AND          | x5  = 0
+[PASS] OR           | x6  = 30
+[PASS] SLT          | x7  = 1
+[PASS] SW and LW    | x8  = 30
+[PASS] BEQ SKIP     | x9  = 0
+[PASS] BEQ TARGET   | x10 = 1
+------------------------------------------
+>>> ALL TESTS PASSED SUCCESSFULLY! <<<
+==========================================
