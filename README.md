@@ -34,7 +34,7 @@ A Verilog implementation of a single-cycle RISC-V processor core targeted for th
 
 ## Verification & Self-Checking Testbench
 
-The core was verified using an automated self-checking testbench simulated with Icarus Verilog. Each instruction writes its result to the register file, and the testbench samples registers post-execution to validate state.
+The core was verified using an automated self-checking testbench simulated with Icarus Verilog via EDA Playground. Each instruction writes its result to the register file, and the testbench samples registers post-execution to validate state.
 
 ### Simulation Summary:
 ```text
