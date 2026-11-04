@@ -1,5 +1,7 @@
 // 2. Register File
-module regfile (
+module regfile #(
+    parameter SIM = 0          // 1 = simulation: start every register at 0
+) (
     input         clk,         // Clock signal
     input         we,          // Write Enable - allows writing when high
     input  [4:0]  rs1,         // Source register 1 address (5 bits = 32 options)
@@ -12,6 +14,14 @@ module regfile (
 
     // Create an array of 32 registers, each 32 bits wide
     reg [31:0] registers [0:31];
+
+    // Simulation only: start all registers at 0 (otherwise they start as x)
+    integer i;
+    initial begin
+        if (SIM) begin
+            for (i = 0; i < 32; i = i + 1) registers[i] = 32'b0;
+        end
+    end
 
     // Asynchronous read:
     // If address is 0, always output 0. Otherwise, output register value.

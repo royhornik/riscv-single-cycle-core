@@ -8,7 +8,8 @@ module cpu_tb;
     wire [5:0] led;
 
     // Instantiate CPU top module
-    cpu uut (
+    // SIM = 1: fast clock + the self-check program inside imem
+    cpu #(.SIM(1)) uut (
         .clk(clk),
         .reset(reset),
         .uart_tx(uart_tx),

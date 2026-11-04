@@ -1,5 +1,8 @@
 // 8. Top Level CPU with UART TX (MMIO)
-module cpu (
+module cpu #(
+    parameter SIM = 0   // 0 = board (slow clock, UART program)
+                        // 1 = simulation (fast clock, self-check program)
+) (
     input        clk,       // 27MHz system clock
     input        reset,     // Active-low push button
     output       uart_tx,   // Physical UART TX pin to PC
@@ -30,14 +33,17 @@ module cpu (
     assign next_pc = pc_src ? branch_target : pc_plus_4;
 
     // Reset & Clock division
-    wire slow_clk;
     wire rst = ~reset;
+    wire slow_clk_div;               // the divided clock (about 10 Hz)
 
     clock_divider uut_clkdiv (
         .clk_in(clk),
         .reset(rst),
-        .clk_out(slow_clk)
+        .clk_out(slow_clk_div)
     );
+
+    // SIM = 1: use the fast clock directly, otherwise a simulation takes forever
+    wire slow_clk = SIM ? clk : slow_clk_div;
 
     // --- Memory-Mapped I/O Logic for UART ---
     // Address 0x00000040 is reserved for UART TX
@@ -66,7 +72,7 @@ module cpu (
     );
 
     // 2. Instruction Memory
-    imem uut_imem (
+    imem #(.SIM(SIM)) uut_imem (
         .pc_address(current_pc),
         .instruction(instruction)
     );
@@ -89,7 +95,7 @@ module cpu (
     );
 
     // 5. Register File
-    regfile uut_regfile (
+    regfile #(.SIM(SIM)) uut_regfile (
         .clk(slow_clk),
         .we(reg_write),
         .rs1(rs1),
